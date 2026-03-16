@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 import requests
+import time
+from otel_metrics import requests_counter, response_time_histogram
 
 # OpenTelemetry
 from opentelemetry import trace
@@ -25,7 +27,7 @@ resource = Resource.create({
 trace_provider = TracerProvider(resource=resource)
 
 otlp_exporter = OTLPSpanExporter(
-    endpoint="http://http://201.23.70.15/:4318/v1/traces"
+    endpoint="http://201.23.70.15:4318/v1/traces"
 )
 
 trace_provider.add_span_processor(
@@ -45,19 +47,13 @@ app = FastAPI()
 FastAPIInstrumentor.instrument_app(app)
 RequestsInstrumentor().instrument()
 
-
 @app.get("/")
 def root():
-    return {"message": "app-telemetria-teste rodando"}
+    start = time.time()
 
+    requests_counter.add(1, {"endpoint": "/"})
 
-@app.get("/teste")
-def teste():
+    elapsed = time.time() - start
+    response_time_histogram.record(elapsed, {"endpoint": "/"})
 
-    with tracer.start_as_current_span("teste-span"):
-
-        r = requests.get("https://httpbin.org/get")
-
-        return {
-            "status": r.status_code
-        }
+    return {"message": "ok"}
