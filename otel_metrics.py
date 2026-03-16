@@ -29,12 +29,24 @@ meter = metrics.get_meter("app-telemetria-teste")
 
 requests_counter = meter.create_counter(
     name="app_requests_total",
-    description="Total de requisições da aplicação",
+    description="Total de requisicoes da aplicacao",
+    unit="1",
+)
+
+errors_counter = meter.create_counter(
+    name="app_requests_error_total",
+    description="Total de requisicoes com erro",
+    unit="1",
+)
+
+inprogress_gauge = meter.create_up_down_counter(
+    name="app_requests_inprogress",
+    description="Requisicoes em andamento",
     unit="1",
 )
 
 response_time_histogram = meter.create_histogram(
     name="app_response_time_seconds",
-    description="Tempo de resposta das requisições",
+    description="Tempo de resposta das requisicoes",
     unit="s",
 )
